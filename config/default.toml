@@ -1,0 +1,15 @@
+# 默认配置。其他配置文件只写要改的项：uv run strata --config config/xxx.toml
+
+worldview = "config/worldview.toml"   # 名字、货物、台词
+
+[world]                 # 规律：宏观变得慢，微观变得快
+size = [3, 3, 4]        # 地区数、每个地区几个村、每个村几个人
+tau = 10                # 人平均隔 tau ~ tau·ratio 天变一次
+ratio = 5               # 每往上一层慢 ratio 倍
+mu = 0.3                # 一个节点有自己的值的概率；否则随上一层
+
+[game]                  # 采办。同一地区里串村当天就到，去别的地区走一天
+lives = 4               # 活几世
+life = 100              # 每一世活几天
+gap = 300               # 死后世界空转几天
+seed = 0

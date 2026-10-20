@@ -1,0 +1,24 @@
+[project]
+name = "strata"
+version = "0.1.0"
+description = "分层世界：宏观变得慢，微观变得快。测记忆会不会判断「每条记忆能信多久」"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+strata = "strata.__main__:main"            # 自己玩
+stratabench = "stratabench.__main__:main"  # 跑分
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/strata", "src/stratabench"]
+
+[tool.ruff]
+line-length = 130
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "B", "UP", "SIM", "I"]
