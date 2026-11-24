@@ -50,6 +50,7 @@ class Game:
         self.life, self.here = 0, None
         self.want, self.stalls = {}, {}
         self.log: list[bool] = []                               # 当前世已结算的每天；结束时加入 lives
+        self._heard = 0                                         # world.shocks 里已经听说过（或死后错过）的条数
         self.lives: list[list[bool]] = []                       # 已结束的每一世
 
     @property
@@ -105,6 +106,7 @@ class Game:
         self.log = []
         if self.life > 1:
             self.say("rebirth", life=self.life)
+        self._heard = len(self.world.shocks)                  # 死后那些天出的变故，没人告诉你
         self.world.step()                                     # 第一日；之后只在逐日结算和死后空转时推进
         self._order()
 
@@ -121,8 +123,15 @@ class Game:
             self.want = m.order(self, self.want)
         self.say("order", day=self.world.day, village=self.here, **self.want)
         self.say("stalls", stalls=self.stalls)
+        self._hear()
         for m in self.mechanisms:
             m.news(self)
+
+    def _hear(self):
+        """活着的每一天，世上新出的变故当天就传到耳朵里，不管出在哪。"""
+        for day, node, slot, value in self.world.shocks[self._heard:]:
+            self.say("shock", day=day, node=node, slot=slot, value=value)
+        self._heard = len(self.world.shocks)
 
     def _go(self, dest):
         if dest != self.here:
@@ -134,6 +143,7 @@ class Game:
             self.here = dest
             self._look()
             self.say("stalls", stalls=self.stalls)
+            self._hear()
         self.phase = "choose"
 
     def shown(self, person) -> dict:

@@ -31,6 +31,8 @@ class View:
         if kind == "stalls":
             return "，".join(self.lines["stall"].format(person=self.name(p), **seen)
                             for p, seen in kw["stalls"].items()) + "。"
+        if kind == "shock":                                     # 每样特质一句：[lines.shock] 里按槽位名找
+            return self.lines["shock"][kw["slot"]].format(place=self.name(kw["node"]), value=kw["value"])
         for k in ("village", "person"):
             if k in kw:
                 kw[k] = self.name(kw[k])

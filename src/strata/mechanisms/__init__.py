@@ -8,6 +8,7 @@ Game 每天在两个固定的时刻调它：
                               （传闻、干扰信息）；新的种类要在世界观的 [lines] 里加一行台词。
 
 能用到的状态：game.world（真值，机制可以看）、game.here、game.want、game.life、game.log、game.say。
+world.shocks 是出过的变故（哪天、节点、槽位、新值），世界自己会在当天播报；传闻可以拿它当素材。
 
 约定：
   机制要用随机数就自己开一个，比如 random.Random(f"{seed}:rumor")，不要动 world.rng。
