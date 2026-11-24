@@ -25,6 +25,7 @@ from .game import Ask, Game
 from .view import View
 
 LAYERS = ("地区", "村", "人")
+LAYERS4 = ("地区", "村", "户", "人")                          # size 写四个数时
 
 ACTIONS = """每一步只回一个动作，不要写别的：
   找 <人名>   找这个人做今天这单
@@ -148,21 +149,22 @@ class Env:
     def name(self, n) -> str | None:
         """节点 n（world 里的编号）在文字里叫什么。agent 还没见过的人没有名字，返回 None。"""
         w = self.game.world
-        return self.view.names["person"].get(n) if w.depth[n] == 2 else self.view.name(n)
+        return self.view.names["person"].get(n) if w.depth[n] == w.layers - 1 else self.view.name(n)
 
     def truth(self) -> dict:
         """此刻的真值。nodes 按编号，每个节点：名字、在哪一层、上一层是谁；每个槽位上
         value（表现出来的值）、own（是不是自己的值）、source / source_layer（由哪个节点、哪一层决定）、since（上次变是哪天）。"""
         w, g = self.game.world, self.game
+        layers = LAYERS if w.layers == 3 else LAYERS4
 
         def slot(n, s):
             src = w.source(n, s)
-            return {"value": w.value(n, s), "own": src == n, "source": src, "source_layer": LAYERS[w.depth[src]],
+            return {"value": w.value(n, s), "own": src == n, "source": src, "source_layer": layers[w.depth[src]],
                     "since": w.since[s][n]}
 
         return {
             "day": w.day, "life": g.life, "day_in_life": len(g.log), "here": g.here, "want": dict(g.want),
-            "nodes": {n: {"name": self.name(n), "layer": LAYERS[w.depth[n]], "parent": w.parent[n],
+            "nodes": {n: {"name": self.name(n), "layer": layers[w.depth[n]], "parent": w.parent[n],
                           **{s: slot(n, s) for s in w.slots}} for n in range(len(w.depth))},
         }
 

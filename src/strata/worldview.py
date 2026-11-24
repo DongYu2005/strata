@@ -26,7 +26,8 @@ from pathlib import Path
 from .config import ROOT
 
 POOLS = ("regions", "villages", "people")
-RESERVED = {"day", "days", "village", "person", "map", "gap", "life", "place", "value", "node", "slot", "stalls"}
+RESERVED = {"day", "days", "village", "person", "house", "map", "gap", "life", "place", "value", "node", "slot",
+            "stalls"}
 BAD_IN_NAME = re.compile(r"[\s。．.！!，,；;「」“”\"'`{}]")       # 文本接口按名字认人认村，这些字符会让动作解析不了
 
 
@@ -46,7 +47,7 @@ def check(view: dict) -> list[str]:
         out.append("缺开场白 intro")
 
     seen = {}
-    for pool in POOLS:
+    for pool in (*POOLS, *(["houses"] if "houses" in view else [])):    # houses：四层的世界才要
         names = view.get(pool)
         if not isinstance(names, list) or not names or not all(isinstance(n, str) and n for n in names):
             out.append(f"{pool} 要是一串非空的名字")
@@ -97,6 +98,8 @@ def check(view: dict) -> list[str]:
         "death": ({"gap"}, set()),
         "rebirth": ({"life"}, set()),
     }
+    if "houses" in view:
+        spec["house"] = ({"house", "stalls"}, set())
     todo = [(kind, lines.get(kind), need, may) for kind, (need, may) in spec.items()]
     shock = lines.get("shock") if isinstance(lines.get("shock"), dict) else {}
     todo += [(f"shock.{s}", shock.get(s), {"place", "value"}, set()) for s in names]
@@ -156,6 +159,7 @@ def abstract(view: dict) -> dict:
         "regions": [_code("R", i) for i in range(len(view["regions"]))],
         "villages": [_code("V", i) for i in range(len(view["villages"]))],
         "people": [_code("P", i) for i in range(len(view["people"]))],
+        **({"houses": [_code("H", i) for i in range(len(view["houses"]))]} if "houses" in view else {}),
         "slots": slots,
         "lines": {
             "map": "地图——{map}。",
@@ -163,6 +167,7 @@ def abstract(view: dict) -> dict:
             "walk": "你走到{village}。",
             "travel": "你去{village}，路上走了 {days} 天。",
             "stall": f"{{person}}：{said(visible)}",
+            **({"house": "{house} 这一户——{stalls}"} if "houses" in view else {}),
             "done": f"你和{{person}}做了一单。结果：{said(hidden)}。成了。",
             "fail": f"你和{{person}}做了一单。结果：{said(hidden)}。没成。",
             "skip": "今天没有合适的人，没做。",
@@ -178,7 +183,7 @@ def dump(view: dict) -> str:
     q = lambda x: json.dumps(x, ensure_ascii=False)  # noqa: E731
     key = lambda k: k if re.fullmatch(r"[A-Za-z0-9_-]+", k) else q(k)  # noqa: E731
     out = [f"intro = {q(view['intro'])}", ""]
-    out += [f"{pool} = [{', '.join(map(q, view[pool]))}]" for pool in POOLS]
+    out += [f"{pool} = [{', '.join(map(q, view[pool]))}]" for pool in (*POOLS, "houses") if pool in view]
     for s in view["slots"]:
         out += ["", "[[slots]]", f"name = {q(s['name'])}", f"values = [{', '.join(map(q, s['values']))}]",
                 f"visible = {'true' if s['visible'] else 'false'}"]

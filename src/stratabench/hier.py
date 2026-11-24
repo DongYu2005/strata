@@ -1,4 +1,4 @@
-"""分层推断（上限参照）：对一个槽位，每个人、每个村、每个地区各一个隐马尔可夫，各自从记录里估计自己变得多快。
+"""分层推断（上限参照）：对一个槽位，每个人、（每户、）每个村、每个地区各一个隐马尔可夫，各自从记录里估计自己变得多快。
 
     每一层的节点：观察是它下面所有人的见闻，隔几层继承，证据就按比例打几次折；
     跳变时多半随上一层（此刻对上一层的估计），少数换成自己的值；最上层均匀地跳。
@@ -60,7 +60,7 @@ class Hier:
 
     def _track(self, node):
         if node not in self.tracks:
-            self.tracks[node] = Track(PERSON_RATES if self.world.depth[node] == 2 else GROUP_RATES)
+            self.tracks[node] = Track(PERSON_RATES if self.world.depth[node] == self.world.layers - 1 else GROUP_RATES)
         return self.tracks[node]
 
     def _emission(self, seen, hops):
