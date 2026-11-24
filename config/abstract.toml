@@ -1,0 +1,7 @@
+# 纯抽象皮：名字、特质、台词都是没有含义的记号，世界和默认配置一模一样（同一个 seed，每一天发生的事都相同）。
+# 用来做换皮对比：规则基线在两张皮上成绩逐日相同，LLM 的成绩要是不一样，差的就是皮。
+# 皮由 python -m strata.worldview abstract -o config/worldview-abstract.toml 生成，不要手改。
+# 用法：uv run python -m strata.env --config config/abstract.toml
+#       node dsh/run.mjs --config config/abstract.toml ...
+
+worldview = "config/worldview-abstract.toml"

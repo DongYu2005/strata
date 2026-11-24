@@ -87,6 +87,18 @@ LLM 对局适配与极简 dsh profile 在 [dsh/](dsh/)。安装、三种上下�
 
 这些基线都采用短视决策，不会为了以后主动打听，因此全知基线也不等于最优策略。
 
+## 换皮
+
+世界观只是一层皮：换了皮，世界和每一天发生的事都不变，规则基线的成绩逐日相同。LLM 的成绩要是变了，差的就是皮。
+
+```bash
+uv run python -m strata.worldview check config/worldview.toml                 # 查一份世界观能不能用
+uv run python -m strata.worldview abstract -o config/worldview-abstract.toml  # 纯抽象皮，不用 LLM
+uv run python -m strata.worldview generate --theme "深海空间站" -o config/worldview-station.toml   # 要 DEEPSEEK_API_KEY
+```
+
+`generate` 让 LLM 照着默认世界观按主题重写：特质的个数、可见性、取值个数不能变，写得不合格会把问题告诉它重写；写完再做一次回读，把台词念给 LLM，看它读不读得出任务要什么、这一单成没成。`config/abstract.toml` 是用纯抽象皮的配置。
+
 ## 目录
 
 ```text
@@ -96,6 +108,7 @@ src/strata/            世界和玩法
   world.py             世界：继承、重抽、快慢
   game.py              显式阶段与统一逐日结算（play() 和 env 都用 start / step）
   view.py              世界节点编号起名，把发生的事写成文字
+  worldview.py         世界观的校验、纯抽象皮、LLM 按主题生成、回读检查
   env.py               文本接口：env.reset() / env.step("不做") / env.truth()，给 LLM 玩，说明见 docs/env.md
   mechanisms/          新机制挂在这里（传闻、指称订单……）
   term.py, __main__.py 自己玩

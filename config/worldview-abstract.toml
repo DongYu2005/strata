@@ -1,0 +1,31 @@
+intro = "这是一个由地区、村、人组成的世界。每个人有几样特质：TA 走到跟前就看得见，TB 要和他做过一单才知道。\n每天你在昨天所在的村醒来，接到一个任务：找一个特质符合要求的人做一单。别村的人现在什么样，只能凭记忆。\n同一地区里换村，当天就到；去别的地区，路上要走一天。\n人的特质会变，村的会变，地区的也会变，只是越大的变得越慢。\n一世到头，世界照常运转；你会在随便哪个村重新开始，之前的事都还记得。"
+
+regions = ["RA", "RB", "RC", "RD"]
+villages = ["VA", "VB", "VC", "VD", "VE", "VF", "VG", "VH", "VI", "VJ", "VK", "VL"]
+people = ["PA", "PB", "PC", "PD", "PE", "PF", "PG", "PH", "PI", "PJ", "PK", "PL", "PM", "PN", "PO", "PP", "PQ", "PR", "PS", "PT", "PU", "PV", "PW", "PX", "PY", "PZ", "PAA", "PAB", "PAC", "PAD", "PAE", "PAF", "PAG", "PAH", "PAI", "PAJ", "PAK", "PAL", "PAM", "PAN", "PAO", "PAP", "PAQ", "PAR", "PAS", "PAT", "PAU", "PAV", "PAW", "PAX", "PAY", "PAZ", "PBA", "PBB", "PBC", "PBD", "PBE", "PBF", "PBG", "PBH", "PBI", "PBJ", "PBK", "PBL", "PBM", "PBN", "PBO", "PBP", "PBQ", "PBR", "PBS", "PBT", "PBU", "PBV", "PBW", "PBX", "PBY", "PBZ", "PCA", "PCB", "PCC", "PCD", "PCE", "PCF", "PCG", "PCH", "PCI", "PCJ", "PCK", "PCL", "PCM", "PCN", "PCO", "PCP", "PCQ", "PCR", "PCS", "PCT", "PCU", "PCV", "PCW", "PCX", "PCY", "PCZ", "PDA", "PDB", "PDC", "PDD", "PDE", "PDF", "PDG", "PDH"]
+
+[[slots]]
+name = "TA"
+values = ["TAa", "TAb", "TAc"]
+visible = true
+
+[[slots]]
+name = "TB"
+values = ["TBa", "TBb"]
+visible = false
+
+[lines]
+map = "地图——{map}。"
+order = "第 {day} 天，你在{village}。任务：找一个 TA 是{TA}、TB 是{TB} 的人做一单。"
+walk = "你走到{village}。"
+travel = "你去{village}，路上走了 {days} 天。"
+stall = "{person}：TA 是{TA}"
+done = "你和{person}做了一单。结果：TB 是{TB}。成了。"
+fail = "你和{person}做了一单。结果：TB 是{TB}。没成。"
+skip = "今天没有合适的人，没做。"
+death = "这一世结束了。世界又过了 {gap} 天。"
+rebirth = "第 {life} 世开始。之前的事，你都还记得。"
+
+[lines.shock]
+TA = "消息：{place}变了，现在那里人人 TA 是{value}。"
+TB = "消息：{place}变了，现在那里人人 TB 是{value}。"
