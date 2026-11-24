@@ -1,4 +1,7 @@
-"""读取配置：config/default.toml（规律与玩法），以及它指向的世界观文件。"""
+"""读取配置：config/default.toml（规律与玩法），以及它指向的世界观文件。
+
+配置文件里的 [view] 盖在世界观上，只改一两句（比如开场白）时不用另抄一份世界观。
+"""
 
 import tomllib
 from pathlib import Path
@@ -16,5 +19,6 @@ def load(path: str | Path | None = None) -> dict:
     cfg = tomllib.loads((ROOT / "config" / "default.toml").read_text(encoding="utf-8"))
     if path:
         cfg = _merge(cfg, tomllib.loads(Path(path).read_text(encoding="utf-8")))
-    cfg["view"] = tomllib.loads((ROOT / cfg["worldview"]).read_text(encoding="utf-8"))
+    view = tomllib.loads((ROOT / cfg["worldview"]).read_text(encoding="utf-8"))
+    cfg["view"] = _merge(view, cfg.get("view", {}))
     return cfg

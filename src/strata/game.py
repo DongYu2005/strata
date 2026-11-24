@@ -3,7 +3,7 @@
 start() 开局，step(answer) 回答当前的 Ask；ask / done 从内核状态导出。
 旅行、交易和不做都经过同一个逐日结算入口，寿命用完即结束这一世。
 World 只管世界变化，接口只翻译动作，View 只把节点和事件写成文字。
-世界、按日订单和每世出生地点使用独立的随机数，走法不改变外部条件。
+世界、按日订单、每世出生地点和失手使用独立的随机数，走法不改变外部条件。
 """
 
 import random
@@ -37,6 +37,9 @@ class Game:
         for key, minimum in (("lives", 1), ("life", 1), ("gap", 0)):
             if type(g[key]) is not int or g[key] < minimum:
                 raise ValueError("lives/life must be positive integers; gap must be a nonnegative integer")
+        self.noise = g.get("noise", 0)                          # 失手的概率；不写就是从不失手
+        if isinstance(self.noise, bool) or not isinstance(self.noise, (int, float)) or not 0 <= self.noise <= 1:
+            raise ValueError("noise must be a number between 0 and 1")
         self.world = World(g["seed"], {s["name"]: s["values"] for s in self.slots}, **cfg["world"])
         self.visible = [s["name"] for s in self.slots if s["visible"]]
         self.hidden = [s["name"] for s in self.slots if not s["visible"]]
@@ -133,20 +136,34 @@ class Game:
             self.say("stalls", stalls=self.stalls)
         self.phase = "choose"
 
+    def shown(self, person) -> dict:
+        """某人今天这一单的表现：每样隐藏特质以 noise 的概率和本性不一样（失手）。
+
+        成不成、采办验出来什么，都按表现算；本性仍在 world.value 里，只给评测用。
+        随机数按（世界日，人，特质）固定，所以同一天找同一个人，怎么走到他跟前结果都一样。
+        """
+        out = {}
+        for s in self.hidden:
+            out[s] = v = self.world.value(person, s)
+            rng = random.Random(f"{self.cfg['game']['seed']}:noise:{self.world.day}:{person}:{s}")
+            if rng.random() < self.noise:
+                out[s] = rng.choice([x for x in self.world.slots[s] if x != v])
+        return out
+
     def _choose(self, person):
         if person is None or any(self.stalls[person][s] != self.want[s] for s in self.visible):
             alive = self._settle_day("skip")
         else:
-            success = all(self.world.value(person, s) == v for s, v in self.want.items())
-            alive = self._settle_day("done" if success else "fail", person)
+            seen = self.shown(person)
+            success = all(seen[s] == self.want[s] for s in self.hidden)
+            alive = self._settle_day("done" if success else "fail", person, seen)
         if alive:
             self._order()
 
-    def _settle_day(self, outcome: Literal["road", "skip", "done", "fail"], person=None) -> bool:
+    def _settle_day(self, outcome: Literal["road", "skip", "done", "fail"], person=None, seen=None) -> bool:
         """结算一天，再进入下一游戏日或死亡边界；返回是否仍活着。"""
         self.log.append(outcome == "done")
         if outcome in ("done", "fail"):
-            seen = {s: self.world.value(person, s) for s in self.hidden}
             self.observe(self.world.day, person, seen)
             self.say(outcome, person=person, **(self.want | seen))
         elif outcome == "skip":
